@@ -6,10 +6,8 @@
  */
 package com.telegram_bot.zakovat_bot.web.rest;
 
-import com.telegram_bot.zakovat_bot.entity.Answer;
 import com.telegram_bot.zakovat_bot.entity.Flow;
 import com.telegram_bot.zakovat_bot.service.FlowService;
-import com.telegram_bot.zakovat_bot.service.dto.AnswerDto;
 import com.telegram_bot.zakovat_bot.service.dto.FlowDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -37,7 +35,7 @@ public class FlowResource {
                 .body(result);
     }
 
-    @PutMapping("/flow/update")
+    @PutMapping("/flow/update/{id}")
     public ResponseEntity<?> update(@RequestBody FlowDto flowDto, @PathVariable Long id) throws URISyntaxException {
         if (flowDto.getId() == null || !flowDto.getId().equals(id)) {
             return ResponseEntity.badRequest().body("Invalid ID");

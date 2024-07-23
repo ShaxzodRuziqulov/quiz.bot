@@ -36,7 +36,7 @@ public class QuestionResource {
                 .body(result);
     }
 
-    @PutMapping("/question/update")
+    @PutMapping("/question/update/{id}")
     public ResponseEntity<?> update(@RequestBody QuestionDto questionDto, @PathVariable Long id) throws URISyntaxException {
         if (questionDto.getId() == null || !questionDto.getId().equals(id)) {
             return ResponseEntity.badRequest().body("Invalid ID");
