@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
+import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -89,7 +90,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-
     /**
      * Handle user state based on received message.
      */
@@ -101,10 +101,13 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "Boshlash":
                 sendFirstQuestion(chatId);
                 break;
+//            case "/poll":
+//                sendPoll(chatId);
             default:
                 log.warn("Unknown command received: {}", messageText);
         }
     }
+
     /**
      * Handle /start command.
      */
@@ -116,6 +119,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendMessage.setReplyMarkup(replyKeyBoard.startKeyboard());
         sendMessage(sendMessage);
     }
+
     /**
      * Send the first question to the user.
      */
@@ -140,7 +144,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
 
-        editMessageReplyMarkup(chatId, update);
+        editMessageReplyMarkup(chatId, update); // Xabarni markupini o'chirish
 
         Question nextQuestion = questionService.getNextQuestion(questionId);
         if (nextQuestion != null) {

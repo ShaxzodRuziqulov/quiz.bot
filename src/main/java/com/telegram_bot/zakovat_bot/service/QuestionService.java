@@ -63,6 +63,9 @@ public class QuestionService {
     public Question getFirstQuestion() {
         return questionRepository.findAll().stream().findFirst().orElse(null);
     }
+    public String strQuestion(String text){
+        return questionRepository.findByQuestionText(text);
+    }
 
     public Question getNextQuestion(Long currentQuestionId) {
         List<Question> questions = questionRepository.findAll();

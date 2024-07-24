@@ -41,7 +41,7 @@ public class AnswerResource {
             return ResponseEntity.badRequest().body("Invalid ID");
         }
         try {
-            AnswerDto result = answerService.create(answerDto);
+            AnswerDto result = answerService.update(answerDto);
             return ResponseEntity.ok().body(result);
         } catch (
                 EntityNotFoundException e) {

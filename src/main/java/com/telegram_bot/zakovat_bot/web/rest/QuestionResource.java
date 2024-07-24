@@ -6,10 +6,8 @@
  */
 package com.telegram_bot.zakovat_bot.web.rest;
 
-import com.telegram_bot.zakovat_bot.entity.Answer;
 import com.telegram_bot.zakovat_bot.entity.Question;
 import com.telegram_bot.zakovat_bot.service.QuestionService;
-import com.telegram_bot.zakovat_bot.service.dto.AnswerDto;
 import com.telegram_bot.zakovat_bot.service.dto.QuestionDto;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -42,7 +40,7 @@ public class QuestionResource {
             return ResponseEntity.badRequest().body("Invalid ID");
         }
         try {
-            QuestionDto result = questionService.create(questionDto);
+            QuestionDto result = questionService.update(questionDto);
             return ResponseEntity.ok().body(result);
         } catch (
                 EntityNotFoundException e) {

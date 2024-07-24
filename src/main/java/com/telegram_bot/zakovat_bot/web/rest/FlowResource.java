@@ -41,7 +41,7 @@ public class FlowResource {
             return ResponseEntity.badRequest().body("Invalid ID");
         }
         try {
-            FlowDto result = flowService.create(flowDto);
+            FlowDto result = flowService.update(flowDto);
             return ResponseEntity.ok().body(result);
         } catch (
                 EntityNotFoundException e) {
