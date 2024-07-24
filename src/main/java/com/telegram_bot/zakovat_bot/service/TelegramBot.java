@@ -17,6 +17,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
@@ -77,6 +78,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                 handleUserState(update, messageText, chatId);
             } catch (TelegramApiException e) {
                 log.error("Error handling user state: ", e);
+                sendMessage(new SendMessage(chatId.toString(), "Xatolik yuz berdi!"));
             }
         } else if (update.hasCallbackQuery()) {
             String callbackData = update.getCallbackQuery().getData();
@@ -101,10 +103,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "Boshlash":
                 sendFirstQuestion(chatId);
                 break;
-//            case "/poll":
-//                sendPoll(chatId);
             default:
                 log.warn("Unknown command received: {}", messageText);
+                sendMessage(new SendMessage(chatId.toString(), "Noma'lum buyruq: " + messageText));
         }
     }
 
@@ -144,7 +145,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
 
-        editMessageReplyMarkup(chatId, update); // Xabarni markupini o'chirish
+        deleteMessage(chatId, update);
 
         Question nextQuestion = questionService.getNextQuestion(questionId);
         if (nextQuestion != null) {
@@ -154,18 +155,15 @@ public class TelegramBot extends TelegramLongPollingBot {
             sendAnswerStats(chatId, userId); // Foydalanuvchi javob statistikasini yuborish
         }
     }
-
-    /**
-     * edit message reply markup
-     */
-    private void editMessageReplyMarkup(Long chatId, Update update) throws TelegramApiException {
-        EditMessageReplyMarkup editMarkup = new EditMessageReplyMarkup();
-        editMarkup.setChatId(chatId.toString());
-        editMarkup.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-        editMarkup.setReplyMarkup(null); // Bo'sh markup
-        execute(editMarkup);
+    private void deleteMessage(Long chatId, Update update) throws TelegramApiException {
+        Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
+        try {
+            execute(new DeleteMessage(chatId.toString(), messageId));
+        } catch (TelegramApiException e) {
+            log.error("Xabarni o'chirishda xatolik: chatId={}, messageId={}", chatId, messageId, e);
+            throw e;
+        }
     }
-
 
     /**
      * Send a question to the user.

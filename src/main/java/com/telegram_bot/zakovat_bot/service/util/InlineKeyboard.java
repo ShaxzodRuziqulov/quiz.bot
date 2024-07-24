@@ -27,15 +27,17 @@ public class InlineKeyboard {
         this.answerService = answerService;
         this.answerRepository = answerRepository;
     }
+
+
     public InlineKeyboardMarkup answerKeyboardMarkup(Long questionId) {
         List<Answer> answers = answerService.getAnswersByQuestionId(questionId);
 
         List<List<InlineKeyboardButton>> buttons = new ArrayList<>();
 
-
         for (Answer answer : answers) {
             List<InlineKeyboardButton> row = new ArrayList<>();
             InlineKeyboardButton button = new InlineKeyboardButton();
+
             button.setText(answer.getAnswerOption() + ": " + answer.getAnswerText());
             button.setCallbackData(questionId + ":" + answer.getId());
             row.add(button);
