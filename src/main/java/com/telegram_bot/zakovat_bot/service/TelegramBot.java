@@ -7,6 +7,7 @@
 package com.telegram_bot.zakovat_bot.service;
 
 import com.telegram_bot.zakovat_bot.config.BotConfig;
+import com.telegram_bot.zakovat_bot.entity.Flow;
 import com.telegram_bot.zakovat_bot.entity.Question;
 import com.telegram_bot.zakovat_bot.service.util.InlineKeyboard;
 import com.telegram_bot.zakovat_bot.service.util.ReplyKeyBoard;
@@ -15,10 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
-import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -145,16 +144,22 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
 
-        deleteMessage(chatId, update);
+        deleteMessage(chatId, update); //habarlarni o'chirish
 
         Question nextQuestion = questionService.getNextQuestion(questionId);
         if (nextQuestion != null) {
+
             sendQuestion(chatId, nextQuestion);
         } else {
             sendMessage(new SendMessage(String.valueOf(chatId), "Barcha savollar tugadi."));
             sendAnswerStats(chatId, userId); // Foydalanuvchi javob statistikasini yuborish
+            flowService.updateFlowStatusToOld(userId); //old statusga update qiladi
         }
     }
+
+    /**
+     * Delete message.
+     */
     private void deleteMessage(Long chatId, Update update) throws TelegramApiException {
         Integer messageId = update.getCallbackQuery().getMessage().getMessageId();
         try {

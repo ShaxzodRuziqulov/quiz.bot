@@ -7,6 +7,7 @@
 package com.telegram_bot.zakovat_bot.service.maper;
 
 import com.telegram_bot.zakovat_bot.entity.Flow;
+import com.telegram_bot.zakovat_bot.entity.enumerated.Status;
 import com.telegram_bot.zakovat_bot.service.dto.FlowDto;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ public class FlowMapper {
         flow.setQuestionId(flowDto.getQuestionId());
         flow.setUserId(flowDto.getUserId());
         flow.setAnswerId(flowDto.getAnswerId());
+        flow.setStatus(Status.valueOf(flowDto.getStatus()));
         return flow;
     }
 

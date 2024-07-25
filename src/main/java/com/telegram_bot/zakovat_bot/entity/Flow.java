@@ -6,10 +6,8 @@
  */
 package com.telegram_bot.zakovat_bot.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.telegram_bot.zakovat_bot.entity.enumerated.Status;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Data
@@ -24,5 +22,7 @@ public class Flow {
     private Long questionId;
 
     private Long userId;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
 }

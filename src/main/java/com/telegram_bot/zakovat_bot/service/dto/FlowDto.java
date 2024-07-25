@@ -17,4 +17,5 @@ public class FlowDto {
     private Long questionId;
 
     private Long userId;
+    private String status;
 }
