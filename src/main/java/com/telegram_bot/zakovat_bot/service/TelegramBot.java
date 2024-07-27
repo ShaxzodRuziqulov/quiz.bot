@@ -7,7 +7,7 @@
 package com.telegram_bot.zakovat_bot.service;
 
 import com.telegram_bot.zakovat_bot.config.BotConfig;
-import com.telegram_bot.zakovat_bot.entity.Flow;
+import com.telegram_bot.zakovat_bot.entity.CorrectAnswer;
 import com.telegram_bot.zakovat_bot.entity.Question;
 import com.telegram_bot.zakovat_bot.service.util.InlineKeyboard;
 import com.telegram_bot.zakovat_bot.service.util.ReplyKeyBoard;
@@ -37,8 +37,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final ReplyKeyBoard replyKeyBoard;
     private final QuestionService questionService;
     private final FlowService flowService;
+    private final CorrectAnswerService correctAnswerService;
 
-    public TelegramBot(BotConfig botConfig, UserService userService, InlineKeyboard inlineKeyboard, ReplyKeyBoard replyKeyBoard, QuestionService questionService, FlowService flowService) {
+    public TelegramBot(BotConfig botConfig, UserService userService, InlineKeyboard inlineKeyboard, ReplyKeyBoard replyKeyBoard, QuestionService questionService, FlowService flowService, CorrectAnswerService correctAnswerService) {
         super(botConfig.getToken());
         this.botConfig = botConfig;
         this.userService = userService;
@@ -46,6 +47,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         this.replyKeyBoard = replyKeyBoard;
         this.questionService = questionService;
         this.flowService = flowService;
+        this.correctAnswerService = correctAnswerService;
         initializeBotCommands();
     }
 
@@ -102,6 +104,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "Boshlash":
                 sendFirstQuestion(chatId);
                 break;
+
             default:
                 log.warn("Unknown command received: {}", messageText);
                 sendMessage(new SendMessage(chatId.toString(), "Noma'lum buyruq: " + messageText));
@@ -113,7 +116,9 @@ public class TelegramBot extends TelegramLongPollingBot {
      */
     private void handleStartCommand(Update update, Long chatId) throws TelegramApiException {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Assalomu alaykum! Zakovat savollarini boshlaysizmi?");
+        sendMessage.setText("Assalomu alaykum, hurmatli ishtirokchilar! Zakovat savollariga tayyormisiz?" +
+                " Aql va mantiqni sinovdan o'tkazadigan qiziqarli savollarimizni boshlash vaqti keldi. " +
+                "Marhamat, boshlaymiz!");
         sendMessage.setChatId(chatId.toString());
         userService.registerUser(update.getMessage());
         sendMessage.setReplyMarkup(replyKeyBoard.startKeyboard());
@@ -148,7 +153,6 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         Question nextQuestion = questionService.getNextQuestion(questionId);
         if (nextQuestion != null) {
-
             sendQuestion(chatId, nextQuestion);
         } else {
             sendMessage(new SendMessage(String.valueOf(chatId), "Barcha savollar tugadi."));
@@ -181,6 +185,8 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setReplyMarkup(inlineKeyboardMarkup);
         sendMessage(message);
     }
+
+
 
     /**
      * Send answer stats

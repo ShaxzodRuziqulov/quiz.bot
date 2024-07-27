@@ -9,6 +9,7 @@ package com.telegram_bot.zakovat_bot.service.util;
 import com.telegram_bot.zakovat_bot.entity.Answer;
 import com.telegram_bot.zakovat_bot.repository.AnswerRepository;
 import com.telegram_bot.zakovat_bot.service.AnswerService;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -47,6 +48,22 @@ public class InlineKeyboard {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.setKeyboard(buttons);
 
+        return inlineKeyboardMarkup;
+    }
+
+    public InlineKeyboardMarkup answerKeyboardMarkup() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+        List<List<InlineKeyboardButton>> row = new ArrayList<>();
+        List<InlineKeyboardButton> buttonList = new ArrayList<>();
+
+        InlineKeyboardButton button = new InlineKeyboardButton("Javoblarni kurish");
+        button.setCallbackData("show_answers");
+
+        buttonList.add(button);
+        row.add(buttonList);
+
+        inlineKeyboardMarkup.setKeyboard(row);
         return inlineKeyboardMarkup;
     }
 
