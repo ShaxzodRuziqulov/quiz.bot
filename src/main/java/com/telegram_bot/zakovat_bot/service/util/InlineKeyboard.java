@@ -9,10 +9,12 @@ package com.telegram_bot.zakovat_bot.service.util;
 import com.telegram_bot.zakovat_bot.entity.Answer;
 import com.telegram_bot.zakovat_bot.repository.AnswerRepository;
 import com.telegram_bot.zakovat_bot.service.AnswerService;
-import lombok.NonNull;
+import com.telegram_bot.zakovat_bot.service.TelegramBot;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 
 import java.util.*;
@@ -50,14 +52,13 @@ public class InlineKeyboard {
 
         return inlineKeyboardMarkup;
     }
-
-    public InlineKeyboardMarkup answerKeyboardMarkup() {
+    public InlineKeyboardMarkup sendButton(){
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         List<List<InlineKeyboardButton>> row = new ArrayList<>();
         List<InlineKeyboardButton> buttonList = new ArrayList<>();
 
-        InlineKeyboardButton button = new InlineKeyboardButton("Javoblarni kurish");
+        InlineKeyboardButton button = new InlineKeyboardButton("Javoblarni ko'rish");
         button.setCallbackData("show_answers");
 
         buttonList.add(button);
@@ -66,6 +67,8 @@ public class InlineKeyboard {
         inlineKeyboardMarkup.setKeyboard(row);
         return inlineKeyboardMarkup;
     }
+
+
 
 
 }

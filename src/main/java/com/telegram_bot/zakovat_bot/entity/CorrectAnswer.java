@@ -18,5 +18,6 @@ public class CorrectAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long questionId;
     private String text;
 }

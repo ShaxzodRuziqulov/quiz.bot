@@ -19,7 +19,8 @@ public class CorrectAnswerService {
     public CorrectAnswerService(CorrectAnswerRepository correctAnswerRepository) {
         this.correctAnswerRepository = correctAnswerRepository;
     }
-    public List<CorrectAnswer> findAll(){
-        return correctAnswerRepository.findAll();
+
+    public CorrectAnswer getCorrectAnswerByQuestionId(Long questionId) {
+        return correctAnswerRepository.findByQuestionId(questionId);
     }
 }

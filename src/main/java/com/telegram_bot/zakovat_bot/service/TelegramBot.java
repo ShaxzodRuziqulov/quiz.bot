@@ -22,6 +22,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -141,23 +142,45 @@ public class TelegramBot extends TelegramLongPollingBot {
      * Handle callback queries.
      */
     private void handleCallbackQuery(String callbackData, Long chatId, Update update) throws TelegramApiException {
-        String[] data = callbackData.split(":");
-        Long questionId = Long.parseLong(data[0]);
-        Long answerId = Long.parseLong(data[1]);
-
-        Long userId = update.getCallbackQuery().getFrom().getId(); // Foydalanuvchi ID sini olish
-
-        flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
-
-        deleteMessage(chatId, update); //habarlarni o'chirish
-
-        Question nextQuestion = questionService.getNextQuestion(questionId);
-        if (nextQuestion != null) {
-            sendQuestion(chatId, nextQuestion);
+        if (callbackData.equals("show_answers")) {
+            showCorrectAnswers(chatId);
         } else {
-            sendMessage(new SendMessage(String.valueOf(chatId), "Barcha savollar tugadi."));
-            sendAnswerStats(chatId, userId); // Foydalanuvchi javob statistikasini yuborish
-            flowService.updateFlowStatusToOld(userId); //old statusga update qiladi
+            String[] data = callbackData.split(":");
+            Long questionId = Long.parseLong(data[0]);
+            Long answerId = Long.parseLong(data[1]);
+
+            Long userId = update.getCallbackQuery().getFrom().getId(); // Foydalanuvchi ID sini olish
+
+            flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
+
+            deleteMessage(chatId, update); //habarlarni o'chirish
+
+            Question nextQuestion = questionService.getNextQuestion(questionId);
+            if (nextQuestion != null) {
+                sendQuestion(chatId, nextQuestion);
+            } else {
+                sendMessage(new SendMessage(String.valueOf(chatId), "Barcha savollar tugadi."));
+                sendAnswerStats(chatId, userId); // Foydalanuvchi javob statistikasini yuborish
+                flowService.updateFlowStatusToOld(userId); //old statusga update qiladi
+            }
+        }
+    }
+
+    private void showCorrectAnswers(Long chatId) throws TelegramApiException {
+        List<Question> allQuestion = questionService.findAllQuestions();
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Question question : allQuestion) {
+            CorrectAnswer correctAnswer = correctAnswerService.getCorrectAnswerByQuestionId(question.getId());
+            if (correctAnswer != null) {
+                stringBuilder.append(question.getId()).append(".  ")
+                        .append("Savol: ").append(question.getQuestionText()).append("\n")
+                        .append("Javob : ").append(correctAnswer.getText()).append("\n\n");
+            }
+        }
+        if (!stringBuilder.isEmpty()) {
+            sendMessage(new SendMessage(String.valueOf(chatId), stringBuilder.toString()));
+        } else {
+            sendMessage(new SendMessage(String.valueOf(chatId), "Javoblar topilmadi"));
         }
     }
 
@@ -187,7 +210,6 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
 
-
     /**
      * Send answer stats
      */
@@ -197,6 +219,18 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         String statsMessage = String.format("To'g'ri javoblar: %d\nNoto'g'ri javoblar: %d", correctAnswers, incorrectAnswers);
         sendMessage(new SendMessage(String.valueOf(chatId), statsMessage));
+
+        sendAnswersButton(chatId);
+    }
+
+    public void sendAnswersButton(Long chatId) throws TelegramApiException {
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText("Savollar va javoblarni ko'rish uchun tugmani bosing:");
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboard.sendButton();
+        message.setReplyMarkup(inlineKeyboardMarkup);
+        sendMessage(message);
     }
 
     /**
