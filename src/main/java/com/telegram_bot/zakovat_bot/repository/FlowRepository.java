@@ -22,4 +22,9 @@ public interface FlowRepository extends JpaRepository<Flow,Long> {
     @Query("UPDATE flow f SET f.status = :oldStatus WHERE f.userId = :userId AND f.status = :newStatus")
     void updateFlowStatus(@Param("newStatus") Status newStatus, @Param("userId") Long userId, @Param("oldStatus") Status oldStatus);
     List<Flow> findByUserIdAndStatus(Long userId, Status status);
+    @Query(value = "select count(*) from flow where user_id = :chatId", nativeQuery = true)
+    Integer findByCountUserId(@Param("chatId") Long chatId);
+    @Query(value = "select user_id, count(*) as count from flow group by user_id order by count desc", nativeQuery = true)
+    List<Object[]> findUserCountsOrdered();
+
 }

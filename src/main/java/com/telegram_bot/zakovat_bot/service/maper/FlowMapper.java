@@ -18,6 +18,7 @@ public class FlowMapper {
         flow.setAnswerId(flowDto.getAnswerId());
         flow.setQuestionId(flowDto.getQuestionId());
         flow.setUserId(flowDto.getUserId());
+        flowDto.setUserName(flow.getFirstName());
         flow.setAnswerId(flowDto.getAnswerId());
         flow.setStatus(Status.valueOf(flowDto.getStatus()));
         return flow;
@@ -29,6 +30,7 @@ public class FlowMapper {
         flowDto.setAnswerId(flow.getAnswerId());
         flowDto.setQuestionId(flow.getQuestionId());
         flowDto.setUserId(flow.getUserId());
+        flowDto.setUserName(flow.getFirstName());
         return flowDto;
     }
 }

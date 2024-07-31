@@ -53,12 +53,13 @@ public class FlowService {
         flowRepository.delete(flow);
     }
 
-    public void saveUserAnswer(Long userId, Long questionId, Long answerId) {
+    public void saveUserAnswer(Long userId, Long questionId, Long answerId,String firstName) {
         Flow flow = new Flow();
         flow.setUserId(userId);
         flow.setQuestionId(questionId);
         flow.setAnswerId(answerId);
         flow.setStatus(Status.NEW);
+        flow.setFirstName(firstName);
         flowRepository.save(flow);
     }
 
@@ -80,4 +81,14 @@ public class FlowService {
     public void updateFlowStatusToOld(Long userId) {
         flowRepository.updateFlowStatus(Status.NEW, userId, Status.OLD);
     }
+    public Object count(){
+        List<Object[]> results = flowRepository.findUserCountsOrdered();
+        for (Object[] result : results) {
+            Long userId = (Long) result[0];
+            Long count = (Long) result[1];
+            System.out.println("User ID: " + userId + ", Count: " + count);
+        }
+        return null;
+    }
+
 }

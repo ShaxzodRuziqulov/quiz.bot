@@ -8,6 +8,7 @@ package com.telegram_bot.zakovat_bot.service;
 
 import com.telegram_bot.zakovat_bot.config.BotConfig;
 import com.telegram_bot.zakovat_bot.entity.CorrectAnswer;
+import com.telegram_bot.zakovat_bot.entity.Flow;
 import com.telegram_bot.zakovat_bot.entity.Question;
 import com.telegram_bot.zakovat_bot.service.util.InlineKeyboard;
 import com.telegram_bot.zakovat_bot.service.util.ReplyKeyBoard;
@@ -22,11 +23,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -58,6 +60,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void initializeBotCommands() {
         List<BotCommand> commandList = new ArrayList<>();
         commandList.add(new BotCommand("/start", "get a welcome message"));
+        commandList.add(new BotCommand("/leaderboard", "eng ko'p savolga javob berganlar"));
         try {
             this.execute(new SetMyCommands(commandList, new BotCommandScopeDefault(), null));
         } catch (TelegramApiException e) {
@@ -102,6 +105,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             case "/start":
                 handleStartCommand(update, chatId);
                 break;
+            case "/leaderboard":
+                sendTopUsers(chatId);
+                break;
             case "Boshlash":
                 sendFirstQuestion(chatId);
                 break;
@@ -111,6 +117,55 @@ public class TelegramBot extends TelegramLongPollingBot {
                 sendMessage(new SendMessage(chatId.toString(), "Noma'lum buyruq: " + messageText));
         }
     }
+
+        private void sendTopUsers(Long chatId) throws TelegramApiException {
+        List<Flow> allFlow = flowService.findAll();
+        if (allFlow.isEmpty()) {
+            System.out.println("No users found");
+        }
+
+        Map<Long, Integer> userFlowCount = new HashMap<>();
+        for (Flow f : allFlow) {
+            userFlowCount.put(f.getUserId(), userFlowCount.getOrDefault(f.getUserId(), 0) + 1);
+        }
+        List<Map.Entry<Long, Integer>> sortedUsers = new ArrayList<>(userFlowCount.entrySet());
+        sortedUsers.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Top users: \n");
+
+        for (int i = 0; i < Math.min(10, sortedUsers.size()); i++) {
+
+            Map.Entry<Long, Integer> entry = sortedUsers.get(i);
+            stringBuilder.append(i + 1).append(" . User Id: ").append(entry.getKey())
+                    .append(" , Flows: ").append(entry.getValue()).append("\n");
+
+        }
+        System.out.println(stringBuilder.toString()); // Test uchun, xabarni konsolda ko'rsatish.
+
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.setText(stringBuilder.toString());
+        sendMessage(message);
+    }
+//    private void sendTopUsers(Long chatId) throws TelegramApiException {
+//        SendMessage message = new SendMessage();
+//        List<Flow> allUsers = flowService.findAll();
+//        if (allUsers.isEmpty()) {
+//            message.setChatId(chatId);
+//            message.setText("Users not found");
+//            sendMessage(message);
+//        }
+//        StringBuilder stringBuilder = new StringBuilder();
+//        stringBuilder.append("Top users");
+//        for (Flow flow : allUsers) {
+//            stringBuilder.append("User id: ").append(flow.getUserId())
+//                    .append(flowService.count());
+//        }
+//        message.setChatId(chatId);
+//        message.setText(stringBuilder.toString());
+//        sendMessage(message);
+//    }
 
     /**
      * Handle /start command.
@@ -150,8 +205,9 @@ public class TelegramBot extends TelegramLongPollingBot {
             Long answerId = Long.parseLong(data[1]);
 
             Long userId = update.getCallbackQuery().getFrom().getId(); // Foydalanuvchi ID sini olish
+            String userName = update.getCallbackQuery().getFrom().getFirstName(); // Foydalanuvchi Ismini olish
 
-            flowService.saveUserAnswer(userId, questionId, answerId); // Javobni saqlash
+            flowService.saveUserAnswer(userId, questionId, answerId, userName); // Javobni saqlash
 
             deleteMessage(chatId, update); //habarlarni o'chirish
 
@@ -166,6 +222,9 @@ public class TelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    /**
+     * show correct answers
+     */
     private void showCorrectAnswers(Long chatId) throws TelegramApiException {
         List<Question> allQuestion = questionService.findAllQuestions();
         StringBuilder stringBuilder = new StringBuilder();
@@ -228,7 +287,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         message.setChatId(chatId);
         message.setText("Savollar va javoblarni ko'rish uchun tugmani bosing:");
 
-        InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboard.sendButton();
+        InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboard.sendAnswersButton();
         message.setReplyMarkup(inlineKeyboardMarkup);
         sendMessage(message);
     }

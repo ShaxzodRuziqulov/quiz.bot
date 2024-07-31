@@ -22,6 +22,7 @@ public class Flow {
     private Long questionId;
 
     private Long userId;
+    private String firstName;
     @Enumerated(EnumType.STRING)
     private Status status;
 
