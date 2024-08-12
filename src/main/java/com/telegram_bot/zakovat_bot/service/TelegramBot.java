@@ -124,21 +124,22 @@ public class TelegramBot extends TelegramLongPollingBot {
             System.out.println("No users found");
         }
 
-        Map<Long, Integer> userFlowCount = new HashMap<>();
+        Map<String, Integer> userFlowCount = new HashMap<>();
         for (Flow f : allFlow) {
-            userFlowCount.put(f.getUserId(), userFlowCount.getOrDefault(f.getUserId(), 0) + 1);
+            userFlowCount.put(f.getFirstName(), userFlowCount.getOrDefault(f.getFirstName(), 0) + 1);
         }
-        List<Map.Entry<Long, Integer>> sortedUsers = new ArrayList<>(userFlowCount.entrySet());
+        List<Map.Entry<String, Integer>> sortedUsers = new ArrayList<>(userFlowCount.entrySet());
         sortedUsers.sort((e1, e2) -> e2.getValue().compareTo(e1.getValue()));
+
 
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Top users: \n");
 
         for (int i = 0; i < Math.min(10, sortedUsers.size()); i++) {
 
-            Map.Entry<Long, Integer> entry = sortedUsers.get(i);
-            stringBuilder.append(i + 1).append(" . User Id: ").append(entry.getKey())
-                    .append(" , Flows: ").append(entry.getValue()).append("\n");
+            Map.Entry<String, Integer> entry = sortedUsers.get(i);
+            stringBuilder.append(i + 1).append(" . User Name: ").append(entry.getKey())
+                    .append(" , Javob berilgan testlar: ").append(entry.getValue()).append("\n");
 
         }
         System.out.println(stringBuilder.toString()); // Test uchun, xabarni konsolda ko'rsatish.
